@@ -1,2 +1,3 @@
 # Kaggle
-Kaggle Project
+Kaggle repo 소개 👋
+직접 해본 Kaggle(캐글) 프로젝트 노트북을 저장하는 공간입니다.
