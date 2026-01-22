@@ -3,13 +3,13 @@
 
 ---
 
-## 1) “셀 순서대로” 코드-학습용 가이드 (입력/출력/핵심 포인트)
+## 1) "셀 순서대로" 코드-학습용 가이드 (입력/출력/핵심 포인트)
 
-아래는 **각 셀을 실행하면서 무엇을 확인해야 하는지**를 “체크리스트”로 만든 것입니다. (노트북을 옆에 켜고 그대로 대조하며 보면 학습이 가장 빨라요)
+아래는 **각 셀을 실행하면서 무엇을 확인해야 하는지**를 "체크리스트"로 만든 것입니다. (노트북을 옆에 켜고 그대로 대조하며 보면 학습이 가장 빨라요)
 
 ### Cell 0 — 문제 정의/전략 선언(설명 셀)
 - **무엇**: 대회명, 타겟(`exam_score`), 지표(RMSE), OOF 기반 선택 방침
-- **왜**: “무슨 모델이든” 결국 **평가 기준과 선택 기준**이 흔들리면 성능이 안 나옴
+- **왜**: "무슨 모델이든" 결국 **평가 기준과 선택 기준**이 흔들리면 성능이 안 나옴
 - **체크**:
   - 타겟 컬럼명이 맞는지: `exam_score`
   - 로컬 검증을 RMSE로 할지(대회 metric과 동일해야 비교 가능)
@@ -30,12 +30,12 @@
 - **무엇**: 여러 후보 경로를 돌며 `train.csv`가 있는 `data` 폴더를 자동 탐색
 - **왜**:
   - 노트북 실행 위치(working directory)가 바뀌면 상대경로가 깨지기 쉬움
-  - Kaggle/로컬/IDE 환경이 바뀌어도 “그냥 돌아가게” 만듦
+  - Kaggle/로컬/IDE 환경이 바뀌어도 "그냥 돌아가게" 만듦
 - **체크**:
   - 출력된 `TRAIN_PATH.exists()`가 True인지
   - 출력된 `DATA_DIR.resolve()`가 실제 폴더인지
 
-> 공부 포인트: “데이터 분석 노트북”은 모델보다 **입력 경로/실행 안정성** 때문에 실패하는 일이 많습니다. 이 셀은 그 문제를 원천 차단하는 패턴이에요.
+> 공부 포인트: "데이터 분석 노트북"은 모델보다 **입력 경로/실행 안정성** 때문에 실패하는 일이 많습니다. 이 셀은 그 문제를 원천 차단하는 패턴이에요.
 
 ---
 
@@ -54,7 +54,7 @@
 #### 1) 누수 방지 assert
 - `TARGET_COL='exam_score'`가 train에 있는지
 - test에 타겟이 없는지
-- **왜**: 이거 한 줄이 “실수로 타겟이 포함된 test” 같은 치명적 누수를 잡습니다.
+- **왜**: 이거 한 줄이 "실수로 타겟이 포함된 test" 같은 치명적 누수를 잡습니다.
 
 #### 2) dtypes / missing / duplicates
 - `dtypes`: 범주형 vs 수치형 분리의 근거
@@ -68,7 +68,7 @@
 - `sns.histplot(exam_score, kde=True)`
 - **왜**:
   - 타겟이 치우쳐 있으면 변환/클리핑/로버스트 손실 등을 고려
-  - 모델이 “평균 회귀”만 해도 어느 정도 되는지 감 잡기
+  - 모델이 "평균 회귀"만 해도 어느 정도 되는지 감 잡기
 
 ---
 
@@ -92,23 +92,23 @@
 - 수치형 `describe()`로 스케일/이상치 감
 - 범주형 `nunique()`로 고유값 개수 확인
 - **체크**:
-  - `id`가 feature에 포함되어 있는데, 이게 의미 있는 신호인지(대회에 따라 “의미 없는 키”일 수도, “시간/순서 신호”일 수도 있음)
+  - `id`가 feature에 포함되어 있는데, 이게 의미 있는 신호인지(대회에 따라 "의미 없는 키"일 수도, "시간/순서 신호"일 수도 있음)
 
 #### 4) 상관 히트맵(샘플링)
 - 63만 행 전부로 corr을 구하기보다 5만 샘플로 빠르게 확인
-- **왜**: 탐색 단계에서는 “정확성”보다 “방향성/가설”이 중요
+- **왜**: 탐색 단계에서는 "정확성"보다 "방향성/가설"이 중요
 
 ---
 
-## 2) 전처리/OOF/블렌딩 “깊게” (이 노트북의 성능 핵심)
+## 2) 전처리/OOF/블렌딩 "깊게" (이 노트북의 성능 핵심)
 
 ### Cell 5 — 전처리 파이프라인(모델별로 다르게 설계한 이유)
-이 셀은 “좋은 캐글 노트북”의 전형입니다. **전처리를 데이터프레임에서 미리 해두지 않고**, 모델과 함께 `Pipeline`에 넣어 **CV 누수를 원천 차단**합니다.
+이 셀은 "좋은 캐글 노트북"의 전형입니다. **전처리를 데이터프레임에서 미리 해두지 않고**, 모델과 함께 `Pipeline`에 넣어 **CV 누수를 원천 차단**합니다.
 
 #### (A) 왜 Pipeline + ColumnTransformer인가?
 - **문제**: 전처리를 전체 train에 한 번에 fit하면, CV의 valid 폴드 정보가 전처리에 섞여 들어갈 수 있음(미묘하지만 실제로 성능 뻥튀기 가능)
 - **해결**: `model.fit(X_tr, y_tr)`를 할 때 전처리도 X_tr에만 fit → valid는 transform만
-- **결론**: CV 점수가 더 “정직”해짐
+- **결론**: CV 점수가 더 "정직"해짐
 
 #### (B) 수치형 전처리: `median imputer`
 - `SimpleImputer(strategy='median')`
@@ -118,16 +118,16 @@
 
 #### (C) 범주형 전처리 2가지: OHE vs Ordinal
 1) **Ridge(선형)** → `OneHotEncoder`
-- 선형 모델은 범주를 숫자로 그냥 넣으면 “순서”로 오해할 수 있음  
+- 선형 모델은 범주를 숫자로 그냥 넣으면 "순서"로 오해할 수 있음  
 - 원핫은 각 카테고리를 독립 차원으로 만들어 선형이 잘 학습
 - `handle_unknown='ignore'`: test에 새로운 카테고리 나와도 에러 안 남
 
 2) **HistGradientBoosting(트리)** → `OrdinalEncoder(unknown=-1)`
 - 트리 계열은 원핫도 가능하지만, 대규모 데이터에서 원핫은 차원이 너무 커질 수 있음
 - Ordinal은 훨씬 가볍고 빠름
-- `unknown_value=-1`은 “미지 카테고리”를 한 값으로 모아 안정화
+- `unknown_value=-1`은 "미지 카테고리"를 한 값으로 모아 안정화
 
-> 주의(공부 포인트): Ordinal은 “순서 의미”를 만들지만, 트리는 분기 규칙을 학습하면서 이를 활용할 수 있어서 실무/캐글에서 자주 쓰입니다. 다만 데이터/모델에 따라 원핫이 더 나을 수도 있어 비교가 중요합니다(이 노트북은 둘 다 비교).
+> 주의(공부 포인트): Ordinal은 "순서 의미"를 만들지만, 트리는 분기 규칙을 학습하면서 이를 활용할 수 있어서 실무/캐글에서 자주 쓰입니다. 다만 데이터/모델에 따라 원핫이 더 나을 수도 있어 비교가 중요합니다(이 노트북은 둘 다 비교).
 
 #### (D) StandardScaler(with_mean=False)의 이유(매우 중요)
 - 원핫 결과는 **희소행렬(sparse)** 인 경우가 많음
@@ -142,11 +142,11 @@
 
 ### Cell 6 — CV + OOF 생성(왜 이렇게 짜는가)
 #### (A) OOF(out-of-fold)란?
-- train의 각 행에 대해 **“그 행을 학습에 사용하지 않은 모델”** 로 예측한 값
-- 즉, train 전체에 대해 “검증 상황의 예측치”를 만든 것
+- train의 각 행에 대해 **"그 행을 학습에 사용하지 않은 모델"** 로 예측한 값
+- 즉, train 전체에 대해 "검증 상황의 예측치"를 만든 것
 
 #### (B) 왜 OOF가 성능 비교에 가장 공정한가?
-- 단순히 fold 평균 RMSE만 보면, “각 fold에서 무엇이 예측됐는지”가 남지 않음
+- 단순히 fold 평균 RMSE만 보면, "각 fold에서 무엇이 예측됐는지"가 남지 않음
 - OOF는 행 단위 예측이 남기 때문에:
   - 모델 A/B가 **어떤 구간에서** 강한지 비교 가능
   - 블렌딩/스태킹에 바로 사용 가능
@@ -161,9 +161,9 @@
   - `oof_pred[va_idx] = va_pred`  ← OOF 완성의 핵심
   - `test_pred += model.predict(X_test)/n_splits`  ← fold 평균
 
-#### (D) “OOF RMSE” 출력이 중요한 이유
+#### (D) "OOF RMSE" 출력이 중요한 이유
 - fold 평균 RMSE와 OOF RMSE는 보통 같거나 매우 유사
-- OOF RMSE는 “전체 train에 대한 한 번의 예측”이므로, 블렌딩 가중치 계산 같은 후처리에 쓰기 좋음
+- OOF RMSE는 "전체 train에 대한 한 번의 예측"이므로, 블렌딩 가중치 계산 같은 후처리에 쓰기 좋음
 
 ---
 
@@ -174,14 +174,14 @@
 
 **해석**
 - 트리 모델이 더 잘 맞는 비선형/상호작용(예: 공부시간×수면×출석 같은 조합)을 잡았을 가능성이 큼
-- Ridge는 “전체 평균적 경향”을 안정적으로 잡아주지만, 복잡한 패턴은 약할 수 있음
+- Ridge는 "전체 평균적 경향"을 안정적으로 잡아주지만, 복잡한 패턴은 약할 수 있음
 
 ---
 
 ### Cell 8 — OOF 기반 최적 블렌딩(수식/직관/주의점)
 #### (A) 목표
 - 최종 예측: `blend = w * ridge + (1-w) * hgb`
-- w를 “감”이 아니라 **OOF에서 MSE 최소화**로 계산
+- w를 "감"이 아니라 **OOF에서 MSE 최소화**로 계산
 
 #### (B) 왜 MSE 최소화가 RMSE에도 유효한가?
 - RMSE는 \(\sqrt{MSE}\)라서, **MSE가 작아지면 RMSE도 작아짐**
@@ -190,7 +190,7 @@
 #### (C) `optimal_blend_weight` 수식 의미(직관)
 - `diff = pred_a - pred_b`
 - 분모 `diff·diff`는 두 모델 예측이 얼마나 다른지(차이의 에너지)
-- 분자 `(y - pred_b)·diff`는 “pred_b에서 y로 가려면 diff 방향으로 얼마나 가야 하는지”
+- 분자 `(y - pred_b)·diff`는 "pred_b에서 y로 가려면 diff 방향으로 얼마나 가야 하는지"
 - 그 결과 w가 0이면 전부 b, 1이면 전부 a가 최적이라는 뜻
 
 #### (D) 왜 clip(0,1)을 하는가?
@@ -201,12 +201,12 @@
 #### (E) 결과 해석
 - `w_ridge ≈ 0.1176`, `w_hgb ≈ 0.8824`
 - 즉, HistGB가 주력이고 Ridge는 보정 역할
-- Blend OOF RMSE가 HistGB보다 소폭 개선 → 두 모델이 “조금 다른 실수”를 하고 있었다는 의미(블렌딩 이득)
+- Blend OOF RMSE가 HistGB보다 소폭 개선 → 두 모델이 "조금 다른 실수"를 하고 있었다는 의미(블렌딩 이득)
 
 #### (F) KDE sanity check를 왜 그리나?
 - 블렌딩이 특정 구간에서 과하게 치우치거나(너무 좁거나/너무 넓거나)
 - 이상치 예측이 폭증하면 위험 신호
-- 분포 비교로 빠르게 “상식적”인지 확인
+- 분포 비교로 빠르게 "상식적"인지 확인
 
 ---
 
@@ -226,7 +226,7 @@
 
 ---
 
-## 3) “공부를 완성”하기 위한 핵심 질문 10개(스스로 점검용)
+## 3) "공부를 완성"하기 위한 핵심 질문 10개(스스로 점검용)
 아래 질문에 답할 수 있으면 이 노트북을 **완전히 내 것으로 만든 것**입니다.
 
 1) 왜 `find_data_dir()` 같은 경로 탐색이 실전에서 중요한가?  
@@ -243,7 +243,7 @@
 ---
 
 ## 4) (선택) 너가 더 성장하려면, 이 노트북을 이렇게 확장해볼 수 있어요
-- **OOF 기반 진단**: “어떤 구간에서” Ridge가 강한지/HistGB가 강한지  
+- **OOF 기반 진단**: "어떤 구간에서" Ridge가 강한지/HistGB가 강한지  
   - 예: 잔차를 `age` 구간별로 평균내서 모델별 약점을 찾기
 - **피처 검토**: `id`가 성능에 진짜 기여하는지(대회에 따라 의미 없을 수 있음)  
 - **CV 전략**: KFold 말고 Stratify가 필요할 정도로 타겟 분포가 특이한지(회귀라 보통 KFold)  
@@ -251,4 +251,100 @@
 
 ---
 
-원하면 내가 **“셀별로 그대로 복사해서 붙일 수 있는 공부용 주석 버전(한글로 왜/주의점 중심)”** 형태로도 정리해줄게요. 특히 헷갈렸던 지점이 `Cell 5(전처리)` / `Cell 6(OOF)` / `Cell 8(블렌딩 수식)` 중 어디인지 말해주면, 그 파트는 예시(작은 수치 장난감 데이터로 w가 어떻게 계산되는지)까지 붙여서 더 확실히 이해되게 만들어줄게요.
+## 5) Version 2 (v2) Improvements - Model Enhancement
+
+### Development Timeline
+- **Initial Score (v1)**: 8.78741 (Kaggle submission)
+- **Goal**: Improve model performance through ensemble expansion, hyperparameter tuning, and feature engineering
+- **Date**: 2026-01-15
+
+### Changes Made
+
+#### 1. Model Expansion (2 → 4-5 models)
+**Added Models:**
+- **XGBoost**: Gradient boosting with `tree_method='hist'` for efficiency
+  - Default: `n_estimators=200`, `max_depth=6`, `learning_rate=0.05`
+  - Uses OrdinalEncoder preprocessing (tree models)
+- **LightGBM**: Fast gradient boosting with histogram-based learning
+  - Default: `n_estimators=200`, `max_depth=6`, `learning_rate=0.05`
+  - Uses OrdinalEncoder preprocessing (tree models)
+
+**Implementation:**
+- All tree models use OrdinalEncoder for consistency and memory efficiency
+- Ridge continues to use OneHotEncoder + StandardScaler
+- Models are wrapped in Pipeline for CV safety
+- Graceful fallback if libraries are not available
+
+**Expected Benefit**: Diverse model predictions improve ensemble robustness
+
+#### 2. Hyperparameter Tuning with Optuna
+**Approach:**
+- Optuna-based optimization for each model
+- Reduced trials (10) and folds (3) during optimization for speed
+- Full 5-fold CV for final OOF generation
+
+**Tuned Parameters:**
+- **Ridge**: `alpha` (L2 regularization, log scale: 0.1-10.0)
+- **HistGB**: `learning_rate` (0.01-0.2, log), `max_leaf_nodes` (31-127), `min_samples_leaf` (20-100)
+- **XGBoost**: `learning_rate` (0.01-0.2, log), `max_depth` (4-8), `subsample` (0.6-1.0), `colsample_bytree` (0.6-1.0)
+- **LightGBM**: `learning_rate` (0.01-0.2, log), `max_depth` (4-8), `subsample` (0.6-1.0), `colsample_bytree` (0.6-1.0)
+
+**Implementation Notes:**
+- Optimization uses scipy.optimize.minimize for multi-model blending
+- Weights constrained to sum to 1.0 and be in [0, 1]
+- Can be disabled by setting `USE_OPTUNA = False` if Optuna is unavailable
+
+#### 3. Feature Engineering
+**Derived Features Added:**
+- `study_efficiency`: `study_hours / (class_attendance + eps)` - efficiency metric
+- `sleep_study_ratio`: `sleep_hours / (study_hours + eps)` - balance indicator
+- `total_engagement`: `study_hours + (class_attendance / 10.0)` - combined metric
+- `study_hours_per_age`: `study_hours / (age + eps)` - age-normalized study time
+
+**Rationale:**
+- Interaction terms capture non-linear relationships
+- Ratios provide normalized perspectives
+- All features use small epsilon (1e-6) to avoid division by zero
+
+#### 4. Enhanced Blending
+**Multi-Model Blending:**
+- Replaced 2-model analytical solution with scipy.optimize for N models
+- Constrained optimization ensures weights sum to 1.0
+- All available models included in blend
+
+**Performance Tracking:**
+- Individual model OOF RMSE reported
+- Blend OOF RMSE compared to baseline
+- Improvement delta calculated
+
+### Code Structure Changes
+1. **Cell 1**: Added XGBoost/LightGBM/Optuna imports with availability checks
+2. **Cell 5 (new)**: Feature engineering cell added after EDA
+3. **Cell 6**: Updated preprocessing comment to note feature engineering
+4. **Cell 7**: Added Optuna optimization function
+5. **Cell 8**: Expanded model training to include XGBoost/LightGBM
+6. **Cell 9**: Multi-model blending with scipy.optimize
+7. **Cell 10**: Submission with performance comparison
+
+### Validation Strategy
+- OOF RMSE used for model selection (no test set leakage)
+- Baseline comparison: v1 OOF RMSE vs v2 Blend OOF RMSE
+- Kaggle submission score tracked separately
+
+### Performance Expectations
+- **Baseline (v1)**: OOF RMSE ~8.82, Kaggle score 8.78741
+- **Target (v2)**: Expected improvement from:
+  - Ensemble diversity (XGBoost/LightGBM)
+  - Optimized hyperparameters
+  - Additional features
+
+### Next Steps (if further improvement needed)
+- Additional feature engineering (polynomial features, target encoding)
+- Stacking with meta-learner
+- More aggressive Optuna trials (increase n_trials)
+- Model-specific feature selection
+- Cross-validation strategy refinement (StratifiedKFold if needed)
+
+---
+
+원하면 내가 **"셀별로 그대로 복사해서 붙일 수 있는 공부용 주석 버전(한글로 왜/주의점 중심)"** 형태로도 정리해줄게요. 특히 헷갈렸던 지점이 `Cell 5(전처리)` / `Cell 6(OOF)` / `Cell 8(블렌딩 수식)` 중 어디인지 말해주면, 그 파트는 예시(작은 수치 장난감 데이터로 w가 어떻게 계산되는지)까지 붙여서 더 확실히 이해되게 만들어줄게요.
