@@ -347,4 +347,99 @@
 
 ---
 
+## 6) Version 3 (v3) Improvements - Code Simplification & Optimization Enhancement
+
+### Development Timeline
+- **v2 Score**: 8.75609 (Kaggle submission)
+- **Goal**: Simplify code, enhance optimization, add feature importance analysis, fix Kaggle errors
+- **Date**: 2026-01-15
+
+### Changes Made
+
+#### 1. Code Simplification
+**Removed:**
+- Korean font configuration code (caused errors on Kaggle)
+- Unnecessary try-except blocks for model imports (all libraries available on Kaggle)
+- Conditional checks for model availability (XGBOOST_AVAILABLE, LIGHTGBM_AVAILABLE, OPTUNA_AVAILABLE)
+- Redundant conditional model training code
+
+**Simplified:**
+- Direct imports: `import xgboost as xgb`, `import lightgbm as lgb`, `import optuna`
+- All models always initialized (no None checks)
+- Cleaner code flow without nested conditionals
+
+**Result**: More maintainable, Kaggle-compatible code without spaghetti structure
+
+#### 2. Enhanced Hyperparameter Optimization
+**Changes:**
+- Optuna trials increased: 10 → 75 per model
+- Better search space exploration
+- Progress bar enabled for tracking optimization progress
+
+**Rationale:**
+- More trials = better chance of finding optimal hyperparameters
+- 75 trials provides good balance between optimization quality and execution time
+- Progress bar helps monitor optimization progress
+
+#### 3. Feature Importance Analysis
+**New Feature:**
+- RandomForest-based quick importance check (50 estimators, 50K sample)
+- Derived features kept only if mean importance > 0.01 threshold
+- Data-driven decision on feature inclusion
+
+**Implementation:**
+- Uses OrdinalEncoder for quick preprocessing
+- Evaluates all derived features together
+- Automatic removal of low-importance features
+
+**Benefits:**
+- Prevents overfitting from irrelevant features
+- Reduces model complexity
+- Improves generalization
+
+#### 4. Enhanced Visualization
+**Improvements:**
+- Dual-panel figure: OOF distributions (left) + performance comparison (right)
+- Horizontal bar chart with color gradient for model comparison
+- Blend RMSE shown as vertical line for easy comparison
+- Better visual clarity and information density
+
+**Code Changes:**
+- `fig, axes = plt.subplots(1, 2, figsize=(14, 5))`
+- Color-coded performance bars
+- Grid lines for better readability
+
+### Code Structure Changes
+1. **Cell 1**: Simplified imports, removed Korean font code
+2. **Cell 5**: Added feature importance analysis with automatic feature selection
+3. **Cell 6**: Simplified model definitions (no conditionals)
+4. **Cell 7**: Updated Optuna function (trials=75, progress bar)
+5. **Cell 8**: Simplified optimization (no conditionals)
+6. **Cell 9**: Simplified model training (all models always run)
+7. **Cell 10**: Enhanced visualization (dual-panel)
+8. **Cell 11**: Updated submission with v3 performance summary
+9. **Cell 12 (new)**: v3 improvements summary markdown
+
+### Validation Strategy
+- Feature importance threshold: mean > 0.01 (prevents overfitting)
+- All models trained consistently (no conditional execution)
+- Enhanced visualization for better model comparison
+- Performance tracking across versions
+
+### Performance Expectations
+- **v2**: OOF RMSE ~8.75, Kaggle score 8.75609
+- **v3**: Expected improvement from:
+  - Better hyperparameter optimization (75 trials)
+  - Data-driven feature selection
+  - Cleaner code execution
+
+### Key Improvements Over v2
+1. **Kaggle Compatibility**: Removed all potential error sources (Korean fonts, missing libraries)
+2. **Better Optimization**: 7.5x more Optuna trials for better hyperparameter search
+3. **Smarter Features**: Importance-based feature selection prevents overfitting
+4. **Better Visualization**: Dual-panel plots provide more insights
+5. **Cleaner Code**: Removed all unnecessary conditionals and error-prone code
+
+---
+
 원하면 내가 **"셀별로 그대로 복사해서 붙일 수 있는 공부용 주석 버전(한글로 왜/주의점 중심)"** 형태로도 정리해줄게요. 특히 헷갈렸던 지점이 `Cell 5(전처리)` / `Cell 6(OOF)` / `Cell 8(블렌딩 수식)` 중 어디인지 말해주면, 그 파트는 예시(작은 수치 장난감 데이터로 w가 어떻게 계산되는지)까지 붙여서 더 확실히 이해되게 만들어줄게요.
